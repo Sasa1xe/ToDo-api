@@ -12,17 +12,34 @@ export async function getTodobyId(id) {
   return res.rows[0];
 }
 
-export async function createTodo(body, title, done) {
+export async function createTodo(body, title) {
   const res = await pool.query(
-    "INSERT INTO todos (title,body,done) VALUES ($1,$2,$3)",
-    [body, title, done],
+    "INSERT INTO todos (title,body) VALUES ($1,$2)",
+    [body, title],
   );
-  console.log(res);
   return res;
 }
 
-export async function updateBook(id, body, title, done) {
-
+export async function updateTodo(id, title, body, done) {
+  const res = await pool.query(
+    "UPDATE todos SET title = $1 ,body = $2 ,done = $3 WHERE id = $4",
+    [title, body, done, id],
+  );
+  return res.rows[0];
 }
 
-export async function deleteBookById(id) {}
+export async function toggleTodoById(id) {
+  const res = await pool.query(
+    `UPDATE todos
+     SET done = CASE WHEN done = 'yes' THEN 'no' ELSE 'yes' END
+     WHERE id = $1
+     RETURNING *`,
+    [id],
+  );
+  return res.rows[0];
+}
+
+export async function deleteTodoById(id) {
+  const res = await pool.query("DELETE FROM todos WHERE id = $1", [id]);
+  return res;
+}
